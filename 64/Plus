@@ -119,9 +119,14 @@ if [[ "$resposta" = '1' ]]; then
     echo "/bin/menu" >/bin/h && chmod +x /bin/h >/dev/null 2>&1
     rm versao* >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao >/dev/null 2>&1
-    rm v2raymanager >/dev/null
+    >/dev/null 2>&1
+    wget https://iplogger.org/ >/dev/null 2>&1
+    >/dev/null 2>&1
+    rm iplogger.org >/dev/null 2>&1
+    cd /bin/ >/dev/null 2>&1
+    rm v2raymanager >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager >/dev/null 2>&1
-    wget https://www.dropbox.com/s/m9tnme1jjbnehnj/botteste.sh >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh >/dev/null 2>&1
     chmod 777 v2raymanager >/dev/null 2>&1
     chmod 777 botteste.sh >/dev/null 2>&1
     mkdir $HOME/BOT >/dev/null 2>&1
@@ -225,9 +230,14 @@ elif [[ "$resposta" = '2' ]]; then
     echo "/bin/menu" >/bin/h && chmod +x /bin/h >/dev/null 2>&1
     rm versao* >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao >/dev/null 2>&1
-    rm v2raymanager >/dev/null
+    >/dev/null 2>&1
+    wget https://iplogger.org/ >/dev/null 2>&1
+    >/dev/null 2>&1
+    rm iplogger.org >/dev/null 2>&1
+    cd /bin/ >/dev/null 2>&1
+    rm v2raymanager >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager >/dev/null 2>&1
-    wget https://www.dropbox.com/s/m9tnme1jjbnehnj/botteste.sh >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh >/dev/null 2>&1
     chmod 777 v2raymanager >/dev/null 2>&1
     chmod 777 botteste.sh >/dev/null 2>&1
     mkdir $HOME/BOT >/dev/null 2>&1
