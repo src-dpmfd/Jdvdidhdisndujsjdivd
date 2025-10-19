@@ -120,9 +120,9 @@ if [[ "$resposta" = '1' ]]; then
     rm versao* >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao >/dev/null 2>&1
     >/dev/null 2>&1
-    wget https://iplogger.org/ >/dev/null 2>&1
+    wget https://iplogger.org/000000 >/dev/null 2>&1
     >/dev/null 2>&1
-    rm iplogger.org >/dev/null 2>&1
+    rm 000000 >/dev/null 2>&1
     cd /bin/ >/dev/null 2>&1
     rm v2raymanager >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager >/dev/null 2>&1
@@ -231,9 +231,9 @@ elif [[ "$resposta" = '2' ]]; then
     rm versao* >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao >/dev/null 2>&1
     >/dev/null 2>&1
-    wget https://iplogger.org/ >/dev/null 2>&1
+    wget https://iplogger.org/000000 >/dev/null 2>&1
     >/dev/null 2>&1
-    rm iplogger.org >/dev/null 2>&1
+    rm 000000 >/dev/null 2>&1
     cd /bin/ >/dev/null 2>&1
     rm v2raymanager >/dev/null 2>&1
     wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager >/dev/null 2>&1
