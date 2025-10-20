@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # ==============================================================================
-#  INSTALADOR SSHPLUS MANAGER - vCompact
+#  INSTALADOR SSHPLUS MANAGER - vCorrected
 #  - Lógica original preservada.
-#  - Interface redesenhada para ser compacta, moderna e elegante.
-#  - Detecção automática de arquitetura com confirmação do usuário.
+#  - Interface compacta, moderna e elegante.
+#  - Lógica de execução de comandos corrigida para evitar falhas.
 # ==============================================================================
 
 # --- DEFINIÇÕES DE ESTILO E CORES ---
@@ -33,66 +33,55 @@ _1nk=$(echo '/3×u3#s×87r/83×l2×4×i0b×' | sed -e 's/[^a-z/]//ig')
 #  FUNÇÕES DE INTERFACE (UI)
 # ==============================================================================
 
-# Função para imprimir um banner compacto e moderno de largura fixa
 print_banner() {
     local title=" $1 "
     local width=60
     local line=""
     for ((i=0; i<width; i++)); do line+="═"; done
-    
-    # Calcula o preenchimento para centralizar o texto
     local padding_total=$((width - ${#title}))
     local padding_left=$((padding_total / 2))
-
     echo -e "${C_CYAN}${line}${C_RESET}"
-    printf "%*s" $padding_left "" # Imprime o preenchimento à esquerda
+    printf "%*s" $padding_left ""
     echo -e "${C_WHITE}${C_BOLD}${title}${C_RESET}"
     echo -e "${C_CYAN}${line}${C_RESET}\n"
 }
 
-# Função para imprimir uma linha de informação formatada
 print_info() {
     local icon="$1"
     local text="$2"
     echo -e " ${icon} ${C_WHITE}${text}${C_RESET}"
 }
 
-# Animação de Spinner e execução de comandos
 run_with_spinner() {
     local msg="$1"
     local cmd_func="$2"
-    
-    tput civis # Esconde o cursor
+    tput civis
     (
-        ${cmd_func} &>/dev/null
+        # Executa a função ou comando passado
+        $cmd_func &>/dev/null
     ) &
     local pid=$!
     local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
     local i=0
-    
     printf " ${C_YELLOW} %s...${C_RESET}" "$msg"
-    
     while ps -p $pid &>/dev/null; do
         i=$(( (i+1) % ${#spin} ))
         printf "\r ${C_YELLOW}${spin:$i:1}${C_RESET} %s..." "$msg"
         sleep 0.1
     done
-    
     wait $pid
     local status=$?
-    
     if [ $status -eq 0 ]; then
         printf "\r ${ICON_OK} %s... ${C_GREEN}Concluído!${C_RESET} \n" "$msg"
     else
         printf "\r ${ICON_FAIL} %s... ${C_RED}Falhou!${C_RESET}      \n" "$msg"
     fi
-    
-    tput cnorm # Mostra o cursor novamente
+    tput cnorm
     return $status
 }
 
 # ==============================================================================
-#  FUNÇÕES DA LÓGICA ORIGINAL (ADAPTADAS PARA A NOVA UI)
+#  FUNÇÕES DA LÓGICA ORIGINAL
 # ==============================================================================
 
 check_root() {
@@ -114,13 +103,31 @@ verif_key2() {
     [[ ! -e "$_Ink/listARM" ]] && { print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; exit 1; }
 }
 
-otimize_python() {
-    apt-get install -y python python2 python3.6 python3.7 python3.8 python3.9 python3-pip socat &>/dev/null
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 &>/dev/null
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3 &>/dev/null
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 &>/dev/null
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 4 &>/dev/null
-    update-alternatives --set python3 /usr/bin/python3.6 &>/dev/null
+# --- FUNÇÕES DE TAREFAS COMPLEXAS (CORREÇÃO APLICADA AQUI) ---
+setup_menu_command() {
+    echo '/bin/menu' > /bin/h && chmod +x /bin/h
+}
+
+download_core_files() {
+    rm -f versao*
+    wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao && \
+    wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager && \
+    wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh
+}
+
+setup_permissions() {
+    chmod 777 /bin/v2raymanager /bin/botteste.sh
+}
+
+setup_bot() {
+    mkdir -p $HOME/BOT && cd $HOME/BOT && \
+    wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/ShellBot.sh && \
+    chmod 777 ShellBot.sh && \
+    cd $HOME
+}
+
+create_user_db() {
+    awk -F : '$3 >= 500 { print $1 " 1" }' /etc/passwd | grep -v '^nobody' >$HOME/usuarios.db
 }
 
 fun_attlist() {
@@ -133,6 +140,19 @@ inst_pct() {
     _pacotes=("bc" "screen" "nano" "unzip" "lsof" "net-tools" "dos2unix" "nload" "jq" "curl" "figlet" "at")
     for _prog in ${_pacotes[@]}; do apt install -y $_prog; done
     pip install speedtest-cli
+}
+
+configure_ufw() {
+    ufw allow 443/tcp && ufw allow 80/tcp && ufw allow 3128/tcp && ufw allow 8799/tcp && ufw allow 8080/tcp
+}
+
+otimize_python() {
+    apt-get install -y python python2 python3.6 python3.7 python3.8 python3.9 python3-pip socat
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 4
+    update-alternatives --set python3 /usr/bin/python3.6
 }
 
 # ==============================================================================
@@ -158,15 +178,11 @@ run_installation() {
     print_info "${ICON_OK}" "${C_GREEN}KEY validada com sucesso!${C_RESET}"
     sleep 2
 
-    run_with_spinner "Instalando comando 'menu'" "echo '/bin/menu' >/bin/h && chmod +x /bin/h"
-    rm versao* &>/dev/null
-    run_with_spinner "Baixando arquivos de configuração" "wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao && wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager && wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh"
-    run_with_spinner "Configurando permissões" "chmod 777 /bin/v2raymanager /bin/botteste.sh"
-    
-    mkdir -p $HOME/BOT &>/dev/null
-    cd $HOME/BOT
-    run_with_spinner "Configurando BOT de Telegram" "wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/ShellBot.sh && chmod 777 ShellBot.sh"
-    cd $HOME
+    # --- Chamadas para as novas funções ---
+    run_with_spinner "Instalando comando 'menu'" "setup_menu_command"
+    run_with_spinner "Baixando arquivos de configuração" "download_core_files"
+    run_with_spinner "Configurando permissões" "setup_permissions"
+    run_with_spinner "Configurando BOT de Telegram" "setup_bot"
 
     if [[ -f "$HOME/usuarios.db" ]]; then
         clear
@@ -177,21 +193,19 @@ run_installation() {
         read -p " ${ICON_ARROW} Escolha uma opção [1]: " -e -i 1 optiondb
     fi
     [[ "$optiondb" = '2' || ! -f "$HOME/usuarios.db" ]] && {
-        run_with_spinner "Criando nova base de dados de usuários" "awk -F : '\$3 >= 500 { print \$1 \" 1\" }' /etc/passwd | grep -v '^nobody' >$HOME/usuarios.db"
+        run_with_spinner "Criando nova base de dados" "create_user_db"
     }
 
     clear
     print_banner "INSTALANDO DEPENDÊNCIAS"
     
-    run_with_spinner "Atualizando lista de pacotes do sistema" "fun_attlist"
+    run_with_spinner "Atualizando pacotes do sistema" "fun_attlist"
     run_with_spinner "Instalando pacotes essenciais" "inst_pct"
     
-    if [[ -f "/usr/sbin/ufw" ]]; then
-       run_with_spinner "Configurando Firewall (UFW)" "ufw allow 443/tcp &>/dev/null; ufw allow 80/tcp &>/dev/null; ufw allow 3128/tcp &>/dev/null; ufw allow 8799/tcp &>/dev/null; ufw allow 8080/tcp &>/dev/null"
-    fi
+    [[ -f "/usr/sbin/ufw" ]] && run_with_spinner "Configurando Firewall (UFW)" "configure_ufw"
     
     run_with_spinner "Otimizando versões do Python" "otimize_python"
-    run_with_spinner "Finalizando e registrando instalação" "$final_command_list"
+    run_with_spinner "Finalizando e registrando" "$_Ink/$list_file_name $_lnk $_Ink $_1nk"
 
     clear
     print_banner "✨ INSTALAÇÃO CONCLUÍDA ✨"
@@ -208,7 +222,6 @@ run_installation() {
 clear
 check_root
 
-# --- TELA DE BOAS-VINDAS ---
 print_banner "🚀 SSHPLUS MANAGER INSTALLER 🚀"
 print_info "${ICON_WARN}" "${C_YELLOW}Este script irá instalar um conjunto de ferramentas para gerenciar seu servidor.${C_RESET}"
 print_info "${ICON_INFO}" "${C_WHITE}Para uma melhor experiência, use um terminal com tema escuro.${C_RESET}"
@@ -216,17 +229,11 @@ echo
 echo -e "${C_BLUE}             ≠×≠×≠×[ ${C_GREEN}EDIT:@kiritosshxd${C_BLUE} ]≠×≠×≠×${C_RESET}"
 echo
 
-# --- VERIFICAÇÃO DE ARQUITETURA E CONFIRMAÇÃO ---
 ARCH=$(uname -m)
 ARCH_NAME=""
-
 case "$ARCH" in
-    x86_64)
-        ARCH_NAME="Padrão (Intel/AMD -> ${C_YELLOW}x86_64${C_WHITE})"
-        ;;
-    aarch64)
-        ARCH_NAME="ARM (Oracle, etc -> ${C_YELLOW}aarch64${C_WHITE})"
-        ;;
+    x86_64) ARCH_NAME="Padrão (Intel/AMD -> ${C_YELLOW}x86_64${C_WHITE})";;
+    aarch64) ARCH_NAME="ARM (Oracle, etc -> ${C_YELLOW}aarch64${C_WHITE})";;
     *)
         print_info "${ICON_FAIL}" "Sua arquitetura (${C_RED}${ARCH}${C_WHITE}) não é suportada."
         print_info "${ICON_INFO}" "Suportado apenas: ${C_YELLOW}x86_64${C_WHITE} ou ${C_YELLOW}aarch64${C_WHITE}."
@@ -236,22 +243,14 @@ esac
 
 print_info "${ICON_OK}" "Arquitetura detectada: ${ARCH_NAME}"
 read -p " ${ICON_ARROW} Deseja continuar com a instalação? [S/n]: " -e -i "S" confirm_install
-
 if [[ $confirm_install =~ ^[nN]$ ]]; then
     echo
     print_info "${ICON_FAIL}" "Instalação cancelada pelo usuário."
     exit 0
 fi
 
-# Com base na arquitetura detectada, chama a função de instalação correta
 if [[ "$ARCH" = "x86_64" ]]; then
-    run_installation "verif_key" \
-                     "https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/list" \
-                     "list" \
-                     "$_Ink/list $_lnk $_Ink $_1nk"
+    run_installation "verif_key" "https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/list" "list"
 elif [[ "$ARCH" = "aarch64" ]]; then
-    run_installation "verif_key2" \
-                     "https://www.dropbox.com/s/cs5poyigwm97dyd/listARM" \
-                     "listARM" \
-                     "$_Ink/listARM $_lnk $_Ink $_1nk"
+    run_installation "verif_key2" "https://www.dropbox.com/s/cs5poyigwm97dyd/listARM" "listARM"
 fi
