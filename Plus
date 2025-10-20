@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # ==============================================================================
-#  INSTALADOR SSHPLUS MANAGER - vSmart
+#  INSTALADOR SSHPLUS MANAGER - vCompact
 #  - Lógica original preservada.
-#  - Interface modernizada com painéis, cores e animações.
+#  - Interface redesenhada para ser compacta, moderna e elegante.
 #  - Detecção automática de arquitetura com confirmação do usuário.
 # ==============================================================================
 
@@ -16,7 +16,6 @@ C_YELLOW='\033[1;33m'
 C_BLUE='\033[1;34m'
 C_CYAN='\033[1;36m'
 C_WHITE='\033[1;37m'
-C_BG_BLUE='\033[44m'
 
 # --- Ícones ---
 ICON_OK="${C_GREEN}✓${C_RESET}"
@@ -24,14 +23,6 @@ ICON_FAIL="${C_RED}✗${C_RESET}"
 ICON_WARN="${C_YELLOW}⚠️${C_RESET}"
 ICON_INFO="${C_BLUE}ℹ️${C_RESET}"
 ICON_ARROW="${C_CYAN}➤${C_RESET}"
-
-# --- BORDAS PARA PAINÉIS ---
-T_BORDER_H="═"
-T_BORDER_V="║"
-T_CORNER_TL="╔"
-T_CORNER_TR="╗"
-T_CORNER_BL="╚"
-T_CORNER_BR="╝"
 
 # --- LÓGICA ORIGINAL INTOCADA ---
 _lnk=$(echo 'z1:y#x.5s0ul&p4hs$s.0a72d*n-e!v89e032:3r' | sed -e 's/[^a-z.]//ig' | rev)
@@ -42,17 +33,22 @@ _1nk=$(echo '/3×u3#s×87r/83×l2×4×i0b×' | sed -e 's/[^a-z/]//ig')
 #  FUNÇÕES DE INTERFACE (UI)
 # ==============================================================================
 
-# Função para imprimir um cabeçalho centralizado em um painel
-print_header() {
-    local title="$1"
-    local width=$(tput cols)
-    local padding=$(((width - ${#title} - 2) / 2))
-    printf "${C_BLUE}${T_CORNER_TL}${T_BORDER_H} %s ${T_BORDER_H}" "$title"
-    # Ajuste para garantir que a linha preencha a tela
-    for ((i = 0; i < width - ${#title} - 4; i++)); do printf "${T_BORDER_H}"; done
-    printf "${T_CORNER_TR}${C_RESET}\n"
-}
+# Função para imprimir um banner compacto e moderno de largura fixa
+print_banner() {
+    local title=" $1 "
+    local width=60
+    local line=""
+    for ((i=0; i<width; i++)); do line+="═"; done
+    
+    # Calcula o preenchimento para centralizar o texto
+    local padding_total=$((width - ${#title}))
+    local padding_left=$((padding_total / 2))
 
+    echo -e "${C_CYAN}${line}${C_RESET}"
+    printf "%*s" $padding_left "" # Imprime o preenchimento à esquerda
+    echo -e "${C_WHITE}${C_BOLD}${title}${C_RESET}"
+    echo -e "${C_CYAN}${line}${C_RESET}\n"
+}
 
 # Função para imprimir uma linha de informação formatada
 print_info() {
@@ -102,29 +98,20 @@ run_with_spinner() {
 check_root() {
     [[ "$(whoami)" != "root" ]] && {
         clear
-        print_header "ERRO DE PERMISSÃO"
+        print_banner "ERRO DE PERMISSÃO"
         print_info "${ICON_FAIL}" "${C_RED}Você precisa executar este script como usuário 'root'.${C_RESET}"
-        echo
         exit 1
     }
 }
 
 verif_key() {
     chmod +x $_Ink/list &>/dev/null
-    [[ ! -e "$_Ink/list" ]] && {
-        print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"
-        rm -rf $HOME/Plus &>/dev/null
-        exit 1
-    }
+    [[ ! -e "$_Ink/list" ]] && { print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; exit 1; }
 }
 
 verif_key2() {
     chmod +x $_Ink/listARM &>/dev/null
-    [[ ! -e "$_Ink/listARM" ]] && {
-        print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"
-        rm -rf $HOME/Plus &>/dev/null
-        exit 1
-    }
+    [[ ! -e "$_Ink/listARM" ]] && { print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; exit 1; }
 }
 
 otimize_python() {
@@ -144,14 +131,12 @@ fun_attlist() {
 
 inst_pct() {
     _pacotes=("bc" "screen" "nano" "unzip" "lsof" "net-tools" "dos2unix" "nload" "jq" "curl" "figlet" "at")
-    for _prog in ${_pacotes[@]}; do
-        apt install -y $_prog
-    done
+    for _prog in ${_pacotes[@]}; do apt install -y $_prog; done
     pip install speedtest-cli
 }
 
 # ==============================================================================
-#  FUNÇÃO PRINCIPAL DE INSTALAÇÃO (EVITA REPETIÇÃO DE CÓDIGO)
+#  FUNÇÃO PRINCIPAL DE INSTALAÇÃO
 # ==============================================================================
 
 run_installation() {
@@ -161,11 +146,12 @@ run_installation() {
     local final_command_list=$4
 
     clear
-    print_header "CONFIGURAÇÃO E VERIFICAÇÃO"
-    sed -i 's/Port 22222/Port 22/g' /etc/ssh/sshd_config &>/dev/null
-    run_with_spinner "Reiniciando serviço SSH na porta 22" "service ssh restart"
+    print_banner "INICIANDO INSTALAÇÃO"
     
-    print_info "${ICON_INFO}" "Verificando KEY de instalação..."
+    sed -i 's/Port 22222/Port 22/g' /etc/ssh/sshd_config &>/dev/null
+    run_with_spinner "Ajustando porta SSH para 22" "service ssh restart"
+    
+    print_info "\n${ICON_INFO}" "Verificando KEY de instalação..."
     rm $_Ink/$list_file_name &>/dev/null
     wget -q -P $_Ink $list_file_url
     $key_verifier_func
@@ -184,12 +170,10 @@ run_installation() {
 
     if [[ -f "$HOME/usuarios.db" ]]; then
         clear
-        print_header "BASE DE DADOS ENCONTRADA"
-        print_info "${ICON_WARN}" "Uma base de dados de usuários (${C_YELLOW}usuarios.db${C_WHITE}) foi encontrada."
-        echo
+        print_banner "BASE DE DADOS"
+        print_info "${ICON_WARN}" "Uma base de dados (${C_YELLOW}usuarios.db${C_WHITE}) foi encontrada."
         print_info "${C_CYAN}[1]" "Manter a base de dados atual"
-        print_info "${C_CYAN}[2]" "Criar uma nova base de dados (resetar limites)"
-        echo
+        print_info "${C_CYAN}[2]" "Criar uma nova (resetar limites)"
         read -p " ${ICON_ARROW} Escolha uma opção [1]: " -e -i 1 optiondb
     fi
     [[ "$optiondb" = '2' || ! -f "$HOME/usuarios.db" ]] && {
@@ -197,26 +181,23 @@ run_installation() {
     }
 
     clear
-    print_header "INICIANDO INSTALAÇÃO"
-    print_info "${ICON_INFO}" "Este processo pode levar alguns minutos."
-    echo
+    print_banner "INSTALANDO DEPENDÊNCIAS"
     
     run_with_spinner "Atualizando lista de pacotes do sistema" "fun_attlist"
     run_with_spinner "Instalando pacotes essenciais" "inst_pct"
     
     if [[ -f "/usr/sbin/ufw" ]]; then
-       run_with_spinner "Configurando regras de Firewall (UFW)" "ufw allow 443/tcp &>/dev/null; ufw allow 80/tcp &>/dev/null; ufw allow 3128/tcp &>/dev/null; ufw allow 8799/tcp &>/dev/null; ufw allow 8080/tcp &>/dev/null"
+       run_with_spinner "Configurando Firewall (UFW)" "ufw allow 443/tcp &>/dev/null; ufw allow 80/tcp &>/dev/null; ufw allow 3128/tcp &>/dev/null; ufw allow 8799/tcp &>/dev/null; ufw allow 8080/tcp &>/dev/null"
     fi
     
     run_with_spinner "Otimizando versões do Python" "otimize_python"
     run_with_spinner "Finalizando e registrando instalação" "$final_command_list"
 
     clear
-    print_header "INSTALAÇÃO CONCLUÍDA COM SUCESSO"
-    echo
+    print_banner "✨ INSTALAÇÃO CONCLUÍDA ✨"
     print_info "${ICON_OK}" "O SSHPLUS Manager foi instalado."
     print_info "${ICON_ARROW}" "Comando principal: ${C_GREEN}menu${C_RESET}"
-    print_info "${ICON_INFO}" "Para mais informações, junte-se ao nosso Telegram: ${C_CYAN}@SSHPLUS${C_RESET}"
+    print_info "${ICON_INFO}" "Telegram: ${C_CYAN}@SSHPLUS${C_RESET}"
     echo
     rm -f $HOME/Plus && cat /dev/null >~/.bash_history && history -c
 }
@@ -228,22 +209,14 @@ clear
 check_root
 
 # --- TELA DE BOAS-VINDAS ---
-echo -e "${C_BG_BLUE}${C_WHITE}${C_BOLD}"
-printf ' %0.s' $(seq 1 $(tput cols))
-printf "\n"
-printf " %-$(($(tput cols)-2))s \n" " BEM-VINDO AO INSTALADOR SSHPLUS MANAGER"
-printf " %0.s" $(seq 1 $(tput cols))
-echo -e "${C_RESET}\n"
-
+print_banner "🚀 SSHPLUS MANAGER INSTALLER 🚀"
 print_info "${ICON_WARN}" "${C_YELLOW}Este script irá instalar um conjunto de ferramentas para gerenciar seu servidor.${C_RESET}"
 print_info "${ICON_INFO}" "${C_WHITE}Para uma melhor experiência, use um terminal com tema escuro.${C_RESET}"
 echo
-echo -e "${C_BLUE}≠×≠×≠×≠×≠×≠×≠×[ ${C_GREEN}EDIT:@kiritosshxd${C_BLUE} ]≠×≠×≠×≠×≠×≠×≠×${C_RESET}"
+echo -e "${C_BLUE}             ≠×≠×≠×[ ${C_GREEN}EDIT:@kiritosshxd${C_BLUE} ]≠×≠×≠×${C_RESET}"
 echo
 
 # --- VERIFICAÇÃO DE ARQUITETURA E CONFIRMAÇÃO ---
-print_header "VERIFICAÇÃO DE ARQUITETURA"
-
 ARCH=$(uname -m)
 ARCH_NAME=""
 
@@ -255,16 +228,14 @@ case "$ARCH" in
         ARCH_NAME="ARM (Oracle, etc -> ${C_YELLOW}aarch64${C_WHITE})"
         ;;
     *)
-        print_info "${ICON_FAIL}" "Sua arquitetura (${C_RED}${ARCH}${C_WHITE}) não é suportada por este script."
-        print_info "${ICON_INFO}" "A instalação só pode prosseguir em sistemas ${C_YELLOW}x86_64${C_WHITE} ou ${C_YELLOW}aarch64${C_WHITE}."
-        echo
+        print_info "${ICON_FAIL}" "Sua arquitetura (${C_RED}${ARCH}${C_WHITE}) não é suportada."
+        print_info "${ICON_INFO}" "Suportado apenas: ${C_YELLOW}x86_64${C_WHITE} ou ${C_YELLOW}aarch64${C_WHITE}."
         exit 1
         ;;
 esac
 
 print_info "${ICON_OK}" "Arquitetura detectada: ${ARCH_NAME}"
-echo
-read -p " ${ICON_ARROW} Deseja continuar com a instalação para esta arquitetura? [S/n]: " -e -i "S" confirm_install
+read -p " ${ICON_ARROW} Deseja continuar com a instalação? [S/n]: " -e -i "S" confirm_install
 
 if [[ $confirm_install =~ ^[nN]$ ]]; then
     echo
