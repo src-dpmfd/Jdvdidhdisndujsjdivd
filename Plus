@@ -21,7 +21,7 @@ ICON_OK="${C_GREEN}✓${C_RESET}"
 ICON_FAIL="${C_RED}✗${C_RESET}"
 ICON_WARN="${C_YELLOW}⚠️${C_RESET}"
 ICON_INFO="${C_BLUE}ℹ️${C_RESET}"
-ICON_ARROW="${C_CYAN}➤${C_RESET}"
+ICON_ARROW="${C_YELLOW}➤${C_RESET}"
 
 # --- LÓGICA ORIGINAL INTOCADA ---
 _lnk=$(echo 'z1:y#x.5s0ul&p4hs$s.0a72d*n-e!v89e032:3r' | sed -e 's/[^a-z.]//ig' | rev)
