@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # ==============================================================================
-#  INSTALADOR SSHPLUS MANAGER - vModern
+#  INSTALADOR SSHPLUS MANAGER - vSmart
 #  - Lógica original preservada.
 #  - Interface modernizada com painéis, cores e animações.
+#  - Detecção automática de arquitetura com confirmação do usuário.
 # ==============================================================================
 
 # --- DEFINIÇÕES DE ESTILO E CORES ---
@@ -47,9 +48,11 @@ print_header() {
     local width=$(tput cols)
     local padding=$(((width - ${#title} - 2) / 2))
     printf "${C_BLUE}${T_CORNER_TL}${T_BORDER_H} %s ${T_BORDER_H}" "$title"
-    for ((i = 0; i < padding * 2 - ${#title}; i++)); do printf "${T_BORDER_H}"; done
+    # Ajuste para garantir que a linha preencha a tela
+    for ((i = 0; i < width - ${#title} - 4; i++)); do printf "${T_BORDER_H}"; done
     printf "${T_CORNER_TR}${C_RESET}\n"
 }
+
 
 # Função para imprimir uma linha de informação formatada
 print_info() {
@@ -59,34 +62,26 @@ print_info() {
 }
 
 # Animação de Spinner e execução de comandos
-# Argumento 1: Mensagem a ser exibida
-# Argumento 2: Comando ou função a ser executado
 run_with_spinner() {
     local msg="$1"
     local cmd_func="$2"
     
-    # Esconde o cursor
-    tput civis
-    
-    # Inicia o processo em background
+    tput civis # Esconde o cursor
     (
         ${cmd_func} &>/dev/null
     ) &
     local pid=$!
-
     local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
     local i=0
     
     printf " ${C_YELLOW} %s...${C_RESET}" "$msg"
     
-    # Enquanto o processo estiver rodando, mostra o spinner
     while ps -p $pid &>/dev/null; do
         i=$(( (i+1) % ${#spin} ))
         printf "\r ${C_YELLOW}${spin:$i:1}${C_RESET} %s..." "$msg"
         sleep 0.1
     done
     
-    # Aguarda o processo e verifica o status de saída
     wait $pid
     local status=$?
     
@@ -96,8 +91,7 @@ run_with_spinner() {
         printf "\r ${ICON_FAIL} %s... ${C_RED}Falhou!${C_RESET}      \n" "$msg"
     fi
     
-    # Mostra o cursor novamente
-    tput cnorm
+    tput cnorm # Mostra o cursor novamente
     return $status
 }
 
@@ -166,7 +160,6 @@ run_installation() {
     local list_file_name=$3
     local final_command_list=$4
 
-    # Passo 1: Configuração e verificação da KEY
     clear
     print_header "CONFIGURAÇÃO E VERIFICAÇÃO"
     sed -i 's/Port 22222/Port 22/g' /etc/ssh/sshd_config &>/dev/null
@@ -179,7 +172,6 @@ run_installation() {
     print_info "${ICON_OK}" "${C_GREEN}KEY validada com sucesso!${C_RESET}"
     sleep 2
 
-    # Passo 2: Download de binários e scripts essenciais
     run_with_spinner "Instalando comando 'menu'" "echo '/bin/menu' >/bin/h && chmod +x /bin/h"
     rm versao* &>/dev/null
     run_with_spinner "Baixando arquivos de configuração" "wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao && wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager && wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh"
@@ -190,7 +182,6 @@ run_installation() {
     run_with_spinner "Configurando BOT de Telegram" "wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/ShellBot.sh && chmod 777 ShellBot.sh"
     cd $HOME
 
-    # Passo 3: Base de dados de usuários
     if [[ -f "$HOME/usuarios.db" ]]; then
         clear
         print_header "BASE DE DADOS ENCONTRADA"
@@ -205,7 +196,6 @@ run_installation() {
         run_with_spinner "Criando nova base de dados de usuários" "awk -F : '\$3 >= 500 { print \$1 \" 1\" }' /etc/passwd | grep -v '^nobody' >$HOME/usuarios.db"
     }
 
-    # Passo 4: Instalação principal
     clear
     print_header "INICIANDO INSTALAÇÃO"
     print_info "${ICON_INFO}" "Este processo pode levar alguns minutos."
@@ -214,7 +204,6 @@ run_installation() {
     run_with_spinner "Atualizando lista de pacotes do sistema" "fun_attlist"
     run_with_spinner "Instalando pacotes essenciais" "inst_pct"
     
-    # Configuração do Firewall
     if [[ -f "/usr/sbin/ufw" ]]; then
        run_with_spinner "Configurando regras de Firewall (UFW)" "ufw allow 443/tcp &>/dev/null; ufw allow 80/tcp &>/dev/null; ufw allow 3128/tcp &>/dev/null; ufw allow 8799/tcp &>/dev/null; ufw allow 8080/tcp &>/dev/null"
     fi
@@ -222,7 +211,6 @@ run_installation() {
     run_with_spinner "Otimizando versões do Python" "otimize_python"
     run_with_spinner "Finalizando e registrando instalação" "$final_command_list"
 
-    # Passo 5: Mensagem final
     clear
     print_header "INSTALAÇÃO CONCLUÍDA COM SUCESSO"
     echo
@@ -232,7 +220,6 @@ run_installation() {
     echo
     rm -f $HOME/Plus && cat /dev/null >~/.bash_history && history -c
 }
-
 
 # ==============================================================================
 #  INÍCIO DA EXECUÇÃO DO SCRIPT
@@ -254,34 +241,46 @@ echo
 echo -e "${C_BLUE}≠×≠×≠×≠×≠×≠×≠×[ ${C_GREEN}EDIT:@kiritosshxd${C_BLUE} ]≠×≠×≠×≠×≠×≠×≠×${C_RESET}"
 echo
 
-# --- MENU DE SELEÇÃO ---
-read -p " ${ICON_ARROW} Deseja iniciar a instalação? [S/n]: " -e -i "S" x
-[[ $x =~ ^[nN]$ ]] && exit 0
+# --- VERIFICAÇÃO DE ARQUITETURA E CONFIRMAÇÃO ---
+print_header "VERIFICAÇÃO DE ARQUITETURA"
 
-clear
-print_header "SELEÇÃO DE ARQUITETURA"
-print_info "${C_CYAN}[1]" "Padrão (Intel/AMD -> ${C_YELLOW}x86_64${C_WHITE})"
-print_info "${C_CYAN}[2]" "ARM (Oracle, etc -> ${C_YELLOW}aarch64${C_WHITE})"
-echo
-read -p " ${ICON_ARROW} Selecione a arquitetura da sua VPS [1]: " -e -i 1 resposta
+ARCH=$(uname -m)
+ARCH_NAME=""
 
-case "$resposta" in
-    '1')
-        run_installation "verif_key" \
-                         "https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/list" \
-                         "list" \
-                         "$_Ink/list $_lnk $_Ink $_1nk"
+case "$ARCH" in
+    x86_64)
+        ARCH_NAME="Padrão (Intel/AMD -> ${C_YELLOW}x86_64${C_WHITE})"
         ;;
-    '2')
-        run_installation "verif_key2" \
-                         "https://www.dropbox.com/s/cs5poyigwm97dyd/listARM" \
-                         "listARM" \
-                         "$_Ink/listARM $_lnk $_Ink $_1nk"
+    aarch64)
+        ARCH_NAME="ARM (Oracle, etc -> ${C_YELLOW}aarch64${C_WHITE})"
         ;;
     *)
+        print_info "${ICON_FAIL}" "Sua arquitetura (${C_RED}${ARCH}${C_WHITE}) não é suportada por este script."
+        print_info "${ICON_INFO}" "A instalação só pode prosseguir em sistemas ${C_YELLOW}x86_64${C_WHITE} ou ${C_YELLOW}aarch64${C_WHITE}."
         echo
-        print_info "${ICON_FAIL}" "${C_RED}Opção inválida! Saindo...${C_RESET}"
-        sleep 2
         exit 1
         ;;
 esac
+
+print_info "${ICON_OK}" "Arquitetura detectada: ${ARCH_NAME}"
+echo
+read -p " ${ICON_ARROW} Deseja continuar com a instalação para esta arquitetura? [S/n]: " -e -i "S" confirm_install
+
+if [[ $confirm_install =~ ^[nN]$ ]]; then
+    echo
+    print_info "${ICON_FAIL}" "Instalação cancelada pelo usuário."
+    exit 0
+fi
+
+# Com base na arquitetura detectada, chama a função de instalação correta
+if [[ "$ARCH" = "x86_64" ]]; then
+    run_installation "verif_key" \
+                     "https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/list" \
+                     "list" \
+                     "$_Ink/list $_lnk $_Ink $_1nk"
+elif [[ "$ARCH" = "aarch64" ]]; then
+    run_installation "verif_key2" \
+                     "https://www.dropbox.com/s/cs5poyigwm97dyd/listARM" \
+                     "listARM" \
+                     "$_Ink/listARM $_lnk $_Ink $_1nk"
+fi
