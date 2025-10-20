@@ -144,7 +144,7 @@ echo -e "${C_BLUE}             ≠×≠×≠×[ ${C_GREEN}EDIT:@alfalemos${C_BLU
 echo
 
 # --- MENU DE SELEÇÃO (MODERNIZADO) ---
-read -p " ${ICON_ARROW} Deseja gerar a KEY e iniciar a instalação? [S/n]: " -e -i "S" x
+read -p " ${ICON_ARROW}" "${C_YELLOW}Deseja gerar a KEY e iniciar a instalação? [S/n]:${C_RESET}" -e -i "S" x
 [[ $x =~ ^[nN]$ ]] && exit 0
 
 ARCH=$(uname -m)
