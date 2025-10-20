@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # ==============================================================================
-#  INSTALADOR SSHPLUS MANAGER - vCorrected
-#  - Lógica original preservada.
-#  - Interface compacta, moderna e elegante.
-#  - Lógica de execução de comandos corrigida para evitar falhas.
+#  INSTALADOR SSHPLUS MANAGER - vFiel
+#  - Lógica 100% fiel ao script original, incluindo caminhos e sequência.
+#  - Interface modernizada para ser compacta e elegante.
 # ==============================================================================
 
 # --- DEFINIÇÕES DE ESTILO E CORES ---
@@ -30,7 +29,7 @@ _Ink=$(echo '/3×u3#s87r/l32o4×c1a×l1/83×l24×i0b×' | sed -e 's/[^a-z/]//ig'
 _1nk=$(echo '/3×u3#s×87r/83×l2×4×i0b×' | sed -e 's/[^a-z/]//ig')
 
 # ==============================================================================
-#  FUNÇÕES DE INTERFACE (UI)
+#  FUNÇÕES DE INTERFACE E LÓGICA (TRADUÇÃO DIRETA DO ORIGINAL)
 # ==============================================================================
 
 print_banner() {
@@ -52,137 +51,146 @@ print_info() {
     echo -e " ${icon} ${C_WHITE}${text}${C_RESET}"
 }
 
+# Substituição direta da fun_bar, com visual spinner
 run_with_spinner() {
     local msg="$1"
     local cmd_func="$2"
-    tput civis
+    
+    # A função fun_bar original executava comandos em background
+    # e usava um arquivo 'fim' para sinalizar. Vamos replicar isso.
     (
-        # Executa a função ou comando passado
-        $cmd_func &>/dev/null
+      [[ -e $HOME/fim ]] && rm -f $HOME/fim
+      # Executa o comando/função passado. Oculta toda a saída.
+      $cmd_func &>/dev/null
+      touch $HOME/fim
     ) &
-    local pid=$!
+    
+    tput civis
     local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
     local i=0
     printf " ${C_YELLOW} %s...${C_RESET}" "$msg"
-    while ps -p $pid &>/dev/null; do
+    
+    # Loop enquanto o arquivo 'fim' não existir
+    while [[ ! -e $HOME/fim ]]; do
         i=$(( (i+1) % ${#spin} ))
         printf "\r ${C_YELLOW}${spin:$i:1}${C_RESET} %s..." "$msg"
         sleep 0.1
     done
-    wait $pid
-    local status=$?
-    if [ $status -eq 0 ]; then
-        printf "\r ${ICON_OK} %s... ${C_GREEN}Concluído!${C_RESET} \n" "$msg"
-    else
-        printf "\r ${ICON_FAIL} %s... ${C_RED}Falhou!${C_RESET}      \n" "$msg"
-    fi
+    
+    printf "\r ${ICON_OK} %s... ${C_GREEN}Concluído!${C_RESET} \n" "$msg"
+    rm -f $HOME/fim
     tput cnorm
-    return $status
 }
 
-# ==============================================================================
-#  FUNÇÕES DA LÓGICA ORIGINAL
-# ==============================================================================
-
-check_root() {
-    [[ "$(whoami)" != "root" ]] && {
-        clear
-        print_banner "ERRO DE PERMISSÃO"
-        print_info "${ICON_FAIL}" "${C_RED}Você precisa executar este script como usuário 'root'.${C_RESET}"
-        exit 1
-    }
-}
-
+# --- FUNÇÕES ORIGINAIS ---
 verif_key() {
     chmod +x $_Ink/list &>/dev/null
-    [[ ! -e "$_Ink/list" ]] && { print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; exit 1; }
+    [[ ! -e "$_Ink/list" ]] && { echo -e "\n${C_RED}KEY INVÁLIDA!${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; sleep 2; clear; exit 1; }
 }
 
 verif_key2() {
     chmod +x $_Ink/listARM &>/dev/null
-    [[ ! -e "$_Ink/listARM" ]] && { print_info "${ICON_FAIL}" "${C_RED}KEY INVÁLIDA! Instalação abortada.${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; exit 1; }
+    [[ ! -e "$_Ink/listARM" ]] && { echo -e "\n${C_RED}KEY INVÁLIDA!${C_RESET}"; rm -rf $HOME/Plus &>/dev/null; sleep 2; clear; exit 1; }
 }
 
-# --- FUNÇÕES DE TAREFAS COMPLEXAS (CORREÇÃO APLICADA AQUI) ---
-setup_menu_command() {
-    echo '/bin/menu' > /bin/h && chmod +x /bin/h
-}
-
-download_core_files() {
-    rm -f versao*
-    wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao && \
-    wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager && \
-    wget -q -P /bin/ https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh
-}
-
-setup_permissions() {
-    chmod 777 /bin/v2raymanager /bin/botteste.sh
-}
-
-setup_bot() {
-    mkdir -p $HOME/BOT && cd $HOME/BOT && \
-    wget -q https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/ShellBot.sh && \
-    chmod 777 ShellBot.sh && \
-    cd $HOME
-}
-
-create_user_db() {
-    awk -F : '$3 >= 500 { print $1 " 1" }' /etc/passwd | grep -v '^nobody' >$HOME/usuarios.db
+otimize_python() {
+    apt-get install python -y &>/dev/null
+    apt-get install python2 -y &>/dev/null
+    apt-get install python3.6 -y &>/dev/null
+    apt-get install python3.7 -y &>/dev/null
+    apt-get install python3.8 -y &>/dev/null
+    apt-get install python3.9 -y &>/dev/null
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 &>/dev/null
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3 &>/dev/null
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 &>/dev/null
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 4 &>/dev/null
+    apt install pip -y &>/dev/null
+    apt install python3-pip -y &>/dev/null
+    apt install socat -y &>/dev/null
+    update-alternatives --set python3 /usr/bin/python3.6 &>/dev/null
 }
 
 fun_attlist() {
     apt-get update -y
     [[ ! -d /usr/share/.plus ]] && mkdir /usr/share/.plus
-    echo "crz: $(date)" > /usr/share/.plus/.plus
+    echo "crz: $(date)" >/usr/share/.plus/.plus
 }
 
 inst_pct() {
-    _pacotes=("bc" "screen" "nano" "unzip" "lsof" "net-tools" "dos2unix" "nload" "jq" "curl" "figlet" "at")
-    for _prog in ${_pacotes[@]}; do apt install -y $_prog; done
+    _pacotes=("bc" "screen" "nano" "unzip" "lsof" "netstat" "net-tools" "dos2unix" "nload" "jq" "curl" "figlet" "python3" "python-pip" "python" "at")
+    for _prog in ${_pacotes[@]}; do apt install $_prog -y; done
     pip install speedtest-cli
 }
 
-configure_ufw() {
-    ufw allow 443/tcp && ufw allow 80/tcp && ufw allow 3128/tcp && ufw allow 8799/tcp && ufw allow 8080/tcp
-}
-
-otimize_python() {
-    apt-get install -y python python2 python3.6 python3.7 python3.8 python3.9 python3-pip socat
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 3
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 4
-    update-alternatives --set python3 /usr/bin/python3.6
-}
 
 # ==============================================================================
-#  FUNÇÃO PRINCIPAL DE INSTALAÇÃO
+#  INÍCIO DA EXECUÇÃO DO SCRIPT
+# ==============================================================================
+clear
+[[ "$(whoami)" != "root" ]] && {
+    echo -e "${C_YELLOW}[${C_RED}Erro${C_YELLOW}] ${C_WHITE}- ${C_YELLOW}você precisa executar como root${C_RESET}"
+    rm $HOME/Plus &>/dev/null 2>&1
+    exit 0
+}
+
+cd $HOME # Garante que estamos no diretório HOME, como no original
+
+# --- TELA DE BOAS-VINDAS (MODERNIZADA) ---
+print_banner "🚀     BEM-VINDO AO SSHPLUS     🚀"
+print_info "${ICON_WARN}" "${C_YELLOW}Este script irá instalar um conjunto de ferramentas para gerenciar seu servidor.${C_RESET}"
+print_info "${ICON_INFO}" "${C_WHITE}Para uma melhor experiência, use um terminal com tema escuro.${C_RESET}"
+echo
+echo -e "${C_BLUE}             ≠×≠×≠×[ ${C_GREEN}EDIT:@alfalemos${C_BLUE} ]≠×≠×≠×${C_RESET}"
+echo
+
+# --- MENU DE SELEÇÃO (MODERNIZADO) ---
+read -p " ${ICON_ARROW} Deseja gerar a KEY e iniciar a instalação? [S/n]: " -e -i "S" x
+[[ $x =~ ^[nN]$ ]] && exit 0
+
+ARCH=$(uname -m)
+resposta=""
+case "$ARCH" in
+    x86_64) resposta="1";;
+    aarch64) resposta="2";;
+    *)
+        print_info "${ICON_FAIL}" "Sua arquitetura (${C_RED}${ARCH}${C_WHITE}) não é suportada."
+        exit 1
+        ;;
+esac
+
+# ==============================================================================
+#  FLUXO DE INSTALAÇÃO - LÓGICA 100% FIEL AO ORIGINAL
 # ==============================================================================
 
-run_installation() {
-    local key_verifier_func=$1
-    local list_file_url=$2
-    local list_file_name=$3
-    local final_command_list=$4
-
-    clear
-    print_banner "INICIANDO INSTALAÇÃO"
+if [[ "$resposta" = '1' ]]; then
+    # --- Lógica para x86_64 ---
+    sed -i 's/Port 22222/Port 22/g' /etc/ssh/sshd_config >/dev/null 2>&1
+    service ssh restart >/dev/null 2>&1
+    mkdir /etc/rec >/dev/null 2>&1
     
-    sed -i 's/Port 22222/Port 22/g' /etc/ssh/sshd_config &>/dev/null
-    run_with_spinner "Ajustando porta SSH para 22" "service ssh restart"
-    
-    print_info "\n${ICON_INFO}" "Verificando KEY de instalação..."
-    rm $_Ink/$list_file_name &>/dev/null
-    wget -q -P $_Ink $list_file_url
-    $key_verifier_func
-    print_info "${ICON_OK}" "${C_GREEN}KEY validada com sucesso!${C_RESET}"
-    sleep 2
+    print_info "${ICON_INFO}" "Verificando KEY..."
+    rm $_Ink/list >/dev/null 2>&1
+    wget -P $_Ink https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/list >/dev/null 2>&1
+    verif_key
+    print_info "${ICON_OK}" "${C_GREEN}KEY Válida! Prosseguindo...${C_RESET}"
+    sleep 3s
 
-    # --- Chamadas para as novas funções ---
-    run_with_spinner "Instalando comando 'menu'" "setup_menu_command"
-    run_with_spinner "Baixando arquivos de configuração" "download_core_files"
-    run_with_spinner "Configurando permissões" "setup_permissions"
-    run_with_spinner "Configurando BOT de Telegram" "setup_bot"
+    echo "/bin/menu" >/bin/h && chmod +x /bin/h >/dev/null 2>&1
+    rm versao* >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao >/dev/null 2>&1
+    
+    cd /bin/ >/dev/null 2>&1 # Mudança de diretório como no original
+    rm v2raymanager >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh >/dev/null 2>&1
+    chmod 777 v2raymanager botteste.sh >/dev/null 2>&1
+    
+    mkdir $HOME/BOT >/dev/null 2>&1
+    cd $HOME/BOT >/dev/null 2>&1 # Mudança de diretório como no original
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/ShellBot.sh >/dev/null 2>&1
+    chmod 777 ShellBot.sh >/dev/null 2>&1
+    
+    cd >/dev/null 2>&1 # Volta para o HOME como no original
 
     if [[ -f "$HOME/usuarios.db" ]]; then
         clear
@@ -193,64 +201,88 @@ run_installation() {
         read -p " ${ICON_ARROW} Escolha uma opção [1]: " -e -i 1 optiondb
     fi
     [[ "$optiondb" = '2' || ! -f "$HOME/usuarios.db" ]] && {
-        run_with_spinner "Criando nova base de dados" "create_user_db"
+        awk -F : '$3 >= 500 { print $1 " 1" }' /etc/passwd | grep -v '^nobody' >$HOME/usuarios.db
     }
 
     clear
-    print_banner "INSTALANDO DEPENDÊNCIAS"
+    print_banner "AGUARDE A INSTALAÇÃO"
+    run_with_spinner "Atualizando sistema" "fun_attlist"
+    run_with_spinner "Instalando pacotes" "inst_pct"
     
-    run_with_spinner "Atualizando pacotes do sistema" "fun_attlist"
-    run_with_spinner "Instalando pacotes essenciais" "inst_pct"
-    
-    [[ -f "/usr/sbin/ufw" ]] && run_with_spinner "Configurando Firewall (UFW)" "configure_ufw"
-    
-    run_with_spinner "Otimizando versões do Python" "otimize_python"
-    run_with_spinner "Finalizando e registrando" "$_Ink/$list_file_name $_lnk $_Ink $_1nk"
+    [[ -f "/usr/sbin/ufw" ]] && ufw allow 443/tcp >/dev/null && ufw allow 80/tcp >/dev/null && ufw allow 3128/tcp >/dev/null && ufw allow 8799/tcp >/dev/null && ufw allow 8080/tcp >/dev/null
+
+    clear
+    print_banner "FINALIZANDO"
+    run_with_spinner "Otimizando Python" "otimize_python"
+    run_with_spinner "Concluindo definições" "$_Ink/list $_lnk $_Ink $_1nk"
 
     clear
     print_banner "✨ INSTALAÇÃO CONCLUÍDA ✨"
+    cd $HOME # Garante que estamos no HOME para a mensagem final
     print_info "${ICON_OK}" "O SSHPLUS Manager foi instalado."
     print_info "${ICON_ARROW}" "Comando principal: ${C_GREEN}menu${C_RESET}"
     print_info "${ICON_INFO}" "Telegram: ${C_CYAN}@SSHPLUS${C_RESET}"
-    echo
-    rm -f $HOME/Plus && cat /dev/null >~/.bash_history && history -c
-}
+    rm $HOME/Plus && cat /dev/null >~/.bash_history && history -c
 
-# ==============================================================================
-#  INÍCIO DA EXECUÇÃO DO SCRIPT
-# ==============================================================================
-clear
-check_root
+elif [[ "$resposta" = '2' ]]; then
+    # --- Lógica para aarch64 (ARM) ---
+    sed -i 's/Port 22222/Port 22/g' /etc/ssh/sshd_config >/dev/null 2>&1
+    service ssh restart >/dev/null 2>&1
+    
+    print_info "${ICON_INFO}" "Verificando KEY..."
+    rm $_Ink/listARM >/dev/null 2>&1
+    wget -P $_Ink https://www.dropbox.com/s/cs5poyigwm97dyd/listARM >/dev/null 2>&1
+    verif_key2
+    print_info "${ICON_OK}" "${C_GREEN}KEY Válida! Prosseguindo...${C_RESET}"
+    sleep 3s
 
-print_banner "🚀 SSHPLUS MANAGER INSTALLER 🚀"
-print_info "${ICON_WARN}" "${C_YELLOW}Este script irá instalar um conjunto de ferramentas para gerenciar seu servidor.${C_RESET}"
-print_info "${ICON_INFO}" "${C_WHITE}Para uma melhor experiência, use um terminal com tema escuro.${C_RESET}"
-echo
-echo -e "${C_BLUE}             ≠×≠×≠×[ ${C_GREEN}EDIT:@kiritosshxd${C_BLUE} ]≠×≠×≠×${C_RESET}"
-echo
+    echo "/bin/menu" >/bin/h && chmod +x /bin/h >/dev/null 2>&1
+    rm versao* >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/versao >/dev/null 2>&1
+    
+    cd /bin/ >/dev/null 2>&1
+    rm v2raymanager >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/v2raymanager >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/botteste.sh >/dev/null 2>&1
+    chmod 777 v2raymanager botteste.sh >/dev/null 2>&1
+    
+    mkdir $HOME/BOT >/dev/null 2>&1
+    cd $HOME/BOT >/dev/null 2>&1
+    wget https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/ShellBot.sh >/dev/null 2>&1
+    chmod 777 ShellBot.sh >/dev/null 2>&1
+    
+    cd >/dev/null 2>&1
 
-ARCH=$(uname -m)
-ARCH_NAME=""
-case "$ARCH" in
-    x86_64) ARCH_NAME="Padrão (Intel/AMD -> ${C_YELLOW}x86_64${C_WHITE})";;
-    aarch64) ARCH_NAME="ARM (Oracle, etc -> ${C_YELLOW}aarch64${C_WHITE})";;
-    *)
-        print_info "${ICON_FAIL}" "Sua arquitetura (${C_RED}${ARCH}${C_WHITE}) não é suportada."
-        print_info "${ICON_INFO}" "Suportado apenas: ${C_YELLOW}x86_64${C_WHITE} ou ${C_YELLOW}aarch64${C_WHITE}."
-        exit 1
-        ;;
-esac
+    if [[ -f "$HOME/usuarios.db" ]]; then
+        clear
+        print_banner "BASE DE DADOS"
+        print_info "${ICON_WARN}" "Uma base de dados (${C_YELLOW}usuarios.db${C_WHITE}) foi encontrada."
+        print_info "${C_CYAN}[1]" "Manter a base de dados atual"
+        print_info "${C_CYAN}[2]" "Criar uma nova (resetar limites)"
+        read -p " ${ICON_ARROW} Escolha uma opção [1]: " -e -i 1 optiondb
+    fi
+    [[ "$optiondb" = '2' || ! -f "$HOME/usuarios.db" ]] && {
+        awk -F : '$3 >= 500 { print $1 " 1" }' /etc/passwd | grep -v '^nobody' >$HOME/usuarios.db
+    }
+    
+    clear
+    print_banner "AGUARDE A INSTALAÇÃO"
+    run_with_spinner "Atualizando sistema" "fun_attlist"
+    run_with_spinner "Instalando pacotes" "inst_pct"
+    
+    [[ -f "/usr/sbin/ufw" ]] && ufw allow 443/tcp >/dev/null && ufw allow 80/tcp >/dev/null && ufw allow 3128/tcp >/dev/null && ufw allow 8799/tcp >/dev/null && ufw allow 8080/tcp >/dev/null
 
-print_info "${ICON_OK}" "Arquitetura detectada: ${ARCH_NAME}"
-read -p " ${ICON_ARROW} Deseja continuar com a instalação? [S/n]: " -e -i "S" confirm_install
-if [[ $confirm_install =~ ^[nN]$ ]]; then
-    echo
-    print_info "${ICON_FAIL}" "Instalação cancelada pelo usuário."
-    exit 0
-fi
+    clear
+    print_banner "FINALIZANDO"
+    run_with_spinner "Otimizando Python" "otimize_python"
+    run_with_spinner "Concluindo definições" "$_Ink/listARM $_lnk $_Ink $_1nk"
 
-if [[ "$ARCH" = "x86_64" ]]; then
-    run_installation "verif_key" "https://raw.githubusercontent.com/src-dpmfd/Jdvdidhdisndujsjdivd/main/list" "list"
-elif [[ "$ARCH" = "aarch64" ]]; then
-    run_installation "verif_key2" "https://www.dropbox.com/s/cs5poyigwm97dyd/listARM" "listARM"
+    clear
+    print_banner "✨ INSTALAÇÃO CONCLUÍDA ✨"
+    cd $HOME
+    print_info "${ICON_OK}" "O SSHPLUS foi instalado."
+    print_info "${ICON_ARROW}" "Comando principal: ${C_GREEN}menu${C_RESET}"
+    print_info "${ICON_INFO}" "Telegram: ${C_CYAN}@alfalemos${C_RESET}"
+    rm $HOME/Plus && cat /dev/null >~/.bash_history && history -c
+
 fi
