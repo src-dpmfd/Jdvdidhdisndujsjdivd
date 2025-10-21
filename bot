@@ -21,7 +21,7 @@ fun_menu() {
     [[ "${message_from_id[$id]}" == "$id_admin" ]] && {
         local env_msg
         env_msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-        env_msg+="<b>BEM VINDO(a)</b>\n"
+        env_msg+="<b>BEM VINDO(a) AO BOT SSHPLUS</b>\n"
         env_msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
         env_msg+="⚠️ <i>SELECIONE UMA OPCAO ABAIXO !</i>\n\n"
         ShellBot.sendMessage --chat_id ${message_chat_id[$id]} --text "$env_msg" \
@@ -37,7 +37,7 @@ fun_menu() {
     if [[ "$(grep -w "${message_from_username}" $ativos | grep -wc 'revenda')" != '0' ]]; then
         local env_msg
         env_msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-        env_msg+="<b>BEM VINDO(a)</b>\n"
+        env_msg+="<b>BEM VINDO(a) AO BOT SSHPLUS</b>\n"
         env_msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
         env_msg+="⚠️ <i>SELECIONE UMA OPCAO ABAIXO !</i>\n\n"
         ShellBot.sendMessage --chat_id ${message_chat_id[$id]} --text "$env_msg" \
@@ -47,7 +47,7 @@ fun_menu() {
     elif [[ "$(grep -w "${message_from_username}" $ativos | grep -wc 'subrevenda')" != '0' ]]; then
         local env_msg
         env_msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-        env_msg+="<b>BEM VINDO(a)</b>\n"
+        env_msg+="<b>BEM VINDO(a) AO BOT SSHPLUS</b>\n"
         env_msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
         env_msg+="⚠️ <i>SELECIONE UMA OPCAO ABAIXO !</i>\n\n"
         ShellBot.sendMessage --chat_id ${message_chat_id[$id]} --text "$env_msg" \
@@ -72,7 +72,7 @@ fun_ajuda() {
     if [[ "$id_chatuser" = "$id_admin" ]]; then
         local env_msg
         env_msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-        env_msg+="<b>BEM VINDO(a)</b>\n"
+        env_msg+="<b>BEM VINDO(a) AO BOT SSHPLUS</b>\n"
         env_msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
         env_msg+="⚠️ <i>Comandos Disponiveis</i>\n\n"
         env_msg+="[<b>01</b>] /menu = Exibe menu\n"
@@ -108,7 +108,7 @@ fun_ajuda() {
     elif [[ "$(grep -w "$id_name" $ativos | awk '{print $NF}')" == 'revenda' ]]; then
         local env_msg
         env_msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-        env_msg+="<b>BEM VINDO(a)</b>\n"
+        env_msg+="<b>BEM VINDO(a) AO BOT SSHPLUS</b>\n"
         env_msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
         env_msg+="⚠️ <i>Comandos Disponiveis</i>\n\n"
         env_msg+="[<b>01</b>] /menu = Exibe menu\n"
@@ -134,7 +134,7 @@ fun_ajuda() {
     elif [[ "$(grep -w "$id_name" $ativos | awk '{print $NF}')" == 'subrevenda' ]]; then
         local env_msg
         env_msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-        env_msg+="<b>BEM VINDO(a)</b>\n"
+        env_msg+="<b>BEM VINDO(a) AO BOT SSHPLUS</b>\n"
         env_msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
         env_msg+="⚠️ <i>Comandos Disponiveis</i>\n\n"
         env_msg+="[<b>01</b>] /menu = Exibe menu\n"
@@ -717,48 +717,92 @@ fun_down() {
 }
 
 infovps() {
+
     [[ "${callback_query_from_id[$id]}" != "$id_admin" ]] && {
         ShellBot.sendMessage --chat_id ${callback_query_message_chat_id[$id]} \
             --text "$(echo -e 🚫 ACESSO NEGADO 🚫)"
         return 0
     }
-    PTs='/tmp/prts'
-    _ons=$(ps -x | grep sshd | grep -v root | grep priv | wc -l)
-    [[ -e /etc/openvpn/openvpn-status.log ]] && _onop=$(grep -c "10.8.0" /etc/openvpn/openvpn-status.log) || _onop="0"
-    [[ -e /etc/default/dropbear ]] && _drp=$(ps aux | grep dropbear | grep -v grep | wc -l) _ondrp=$(($_drp - 1)) || _ondrp="0"
-    _on=$(($_ons + $_onop + $_ondrp))
-    total=$(awk -F: '$3>=1000 {print $1}' /etc/passwd | grep -v nobody | wc -l)
-    system=$(cat /etc/issue.net)
-    uso=$(top -bn1 | awk '/Cpu/ { cpu = "" 100 - $8 "%" }; END { print cpu }')
-    cpucores=$(grep -c cpu[0-9] /proc/stat)
-    ram1=$(free -h | grep -i mem | awk {'print $2'})
-    usoram=$(free -m | awk 'NR==2{printf "%.2f%%\t\t", $3*100/$2 }')
-    total=$(cat -n /root/usuarios.db | tail -n 1 | awk '{print $1}')
-    echo -e "SSH: $(grep 'Port' /etc/ssh/sshd_config | cut -d' ' -f2 | grep -v 'no' | xargs)" >$PTs
-    [[ -e "/etc/stunnel/stunnel.conf" ]] && echo -e "SSL Tunel: $(netstat -nplt | grep 'stunnel' | awk {'print $4'} | cut -d: -f2 | xargs)" >>$PTs
-    [[ -e "/etc/openvpn/server.conf" ]] && echo -e "Openvpn: $(netstat -nplt | grep 'openvpn' | awk {'print $4'} | cut -d: -f2 | xargs)" >>$PTs
-    [[ "$(netstat -nplt | grep 'sslh' | wc -l)" != '0' ]] && echo -e "SSlh: $(netstat -nplt | grep 'sslh' | awk {'print $4'} | cut -d: -f2 | xargs)" >>$PTs
-    [[ "$(netstat -nplt | grep 'squid' | wc -l)" != '0' ]] && echo -e "Squid: $(netstat -nplt | grep 'squid' | awk -F ":" {'print $4'} | xargs)" >>$PTs
-    [[ "$(netstat -nltp | grep 'dropbear' | wc -l)" != '0' ]] && echo -e "DropBear: $(netstat -nplt | grep 'dropbear' | awk -F ":" {'print $4'} | xargs)" >>$PTs
-    [[ "$(netstat -nplt | grep 'python' | wc -l)" != '0' ]] && echo -e "Proxy Socks: $(netstat -nplt | grep 'python' | awk {'print $4'} | cut -d: -f2 | xargs)" >>$PTs
+    
+
+    ShellBot.answerCallbackQuery --callback_query_id ${callback_query_id[$id]} \
+        --text "Coletando informações do servidor..."
+
+
     local info
     info="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
-    info+="<b>INFORMACOES DO SERVIDOR</b>\n"
+    info+="<b>INFORMAÇÕES DO SERVIDOR</b>\n"
     info+="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
+
+
     info+="<b>SISTEMA OPERACIONAL</b>\n"
-    info+="$system\n\n"
+    if [ -f /etc/lsb-release ]; then
+        name=$(cat /etc/lsb-release | grep DESCRIPTION | awk -F= '{print $2}')
+        codename=$(cat /etc/lsb-release | grep CODENAME | awk -F= '{print $2}')
+        info+="<b>Nome:</b> <code>$name</code>\n"
+        info+="<b>CodeName:</b> <code>$codename</code>\n"
+        info+="<b>Kernel:</b> <code>$(uname -s)</code>\n"
+        info+="<b>Kernel Release:</b> <code>$(uname -r)</code>\n"
+        if [ -f /etc/os-release ]; then
+            devlike=$(cat /etc/os-release | grep LIKE | awk -F= '{print $2}')
+            info+="<b>Derivado do OS:</b> <code>$devlike</code>\n"
+        fi
+    else
+        system=$(cat /etc/issue.net)
+        info+="<b>Nome:</b> <code>$system</code>\n"
+    fi
+    info+="\n"
+
+
     info+="<b>PROCESSADOR</b>\n"
-    info+="<b>Nucleos:</b> $cpucores\n"
-    info+="<b>Ultilizacao:</b> $uso\n\n"
-    info+="<b>MEMORIA RAM</b>\n"
-    info+="<b>Total:</b> $ram1\n"
-    info+="<b>Ultilizacao:</b> $usoram\n\n"
-    while read linha; do
-        info+="<b>$(echo -e "$linha")</b>\n"
-    done < <(cat $PTs)
-    info+="\n<b>$total</b><i> USUARIOS</i><b> $_on</b> <i>ONLINE</i>"
+    if [ -f /proc/cpuinfo ]; then
+        uso=$(top -bn1 | awk '/Cpu/ { cpu = "" 100 - $8 "%" }; END { print cpu }')
+        modelo=$(cat /proc/cpuinfo | grep "model name" | uniq | awk -F: '{print $2}')
+        cpucores=$(grep -c cpu[0-9] /proc/stat)
+        cache=$(cat /proc/cpuinfo | grep "cache size" | uniq | awk -F: '{print $2}')
+        info+="<b>Modelo:</b><code>$modelo</code>\n"
+        info+="<b>Núcleos:</b> <code>$cpucores</code>\n"
+        info+="<b>Cache:</b><code>$cache</code>\n"
+        info+="<b>Arquitetura:</b> <code>$(uname -p)</code>\n"
+        info+="<b>Utilização:</b> <code>$uso</code>\n"
+    else
+        info+="<code>Não foi possível obter informações da CPU.</code>\n"
+    fi
+    info+="\n"
+
+
+    info+="<b>MEMÓRIA RAM</b>\n"
+    if free 1>/dev/null 2>/dev/null; then
+        ram1=$(free -h | grep -i mem | awk '{print $2}')
+        ram2=$(free -h | grep -i mem | awk '{print $4}')
+        ram3=$(free -h | grep -i mem | awk '{print $3}')
+        usoram=$(free -m | awk 'NR==2{printf "%.2f%%", $3*100/$2 }')
+        info+="<b>Total:</b> <code>$ram1</code>\n"
+        info+="<b>Em Uso:</b> <code>$ram3</code>\n"
+        info+="<b>Livre:</b> <code>$ram2</code>\n"
+        info+="<b>Utilização:</b> <code>$usoram</code>\n"
+    else
+        info+="<code>Não foi possível obter informações de RAM.</code>\n"
+    fi
+    info+="\n"
+    
+
+    info+="<b>SERVIÇOS EM EXECUÇÃO (Portas)</b>\n"
+
+    PT=$(timeout 10s lsof -V -i tcp -P -n | grep -v "ESTABLISHED" | grep -v "COMMAND" | grep "LISTEN")
+    if [[ -n "$PT" ]]; then
+        ports_list=$(echo -e "$PT" | awk '{print $9}' | awk -F: '{print $NF}' | sort -un)
+        for porta in $ports_list; do
+            svcs=$(echo -e "$PT" | grep -w ":$porta" | awk '{print $1}' | uniq | tr '\n' ' ')
+            info+="<code>Serviço: ${svcs% } | Porta: $porta</code>\n"
+        done
+    else
+        info+="<code>Nenhum serviço de escuta encontrado.</code>\n"
+    fi
+
+
     ShellBot.sendMessage --chat_id $id_admin \
-        --text "$(echo -e $info)" \
+        --text "$(echo -e "$info")" \
         --parse_mode html
     return 0
 }
@@ -845,24 +889,54 @@ speed_test() {
     }
 
 
+    ShellBot.answerCallbackQuery --callback_query_id ${callback_query_id[$id]} \
+        --text "Iniciando processo completo..."
+
+
+
+    ShellBot.sendMessage --chat_id $id_admin \
+        --text "🔄 **Atualizando/Instalando o Speedtest...**\nIsso garantirá a versão mais recente e pode levar um momento." \
+        --parse_mode markdown
+
+
+
+    {
+        apt-get purge speedtest speedtest-cli -y
+        rm -f /etc/apt/sources.list.d/speedtest.list
+        apt-get install curl gnupg lsb-release -y
+        curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash
+        apt-get update
+        apt-get install speedtest -y
+    } &> /dev/null
+
+
+
     if ! command -v speedtest &> /dev/null; then
-        ShellBot.answerCallbackQuery --callback_query_id ${callback_query_id[$id]} \
-            --text "ERRO: O cliente Speedtest da Ookla não está instalado."
-            
         ShellBot.sendMessage --chat_id $id_admin \
-            --text "⚠️ <b>A ferramenta oficial 'speedtest' não foi encontrada.</b>\n\nPara corrigir, execute o seu próprio script de instalação ou use os comandos adequados para o seu sistema." \
+            --text "❌ <b>Falha crítica na instalação do Speedtest.</b>\n\nNão foi possível continuar. Verifique os logs do sistema ou se os repositórios estão acessíveis." \
             --parse_mode html
         return 0
     fi
 
 
-    ShellBot.answerCallbackQuery --callback_query_id ${callback_query_id[$id]} \
-        --text "🚀 INICIANDO TESTE DE VELOCIDADE..."
 
-
+    ShellBot.sendMessage --chat_id $id_admin \
+        --text "✅ **Instalação concluída!**\n\n🚀 Iniciando o teste de velocidade..." \
+        --parse_mode markdown
 
     local RESULT
-    RESULT=$(speedtest --accept-license --accept-gdpr 2>&1)
+    local exit_code
+    
+
+    RESULT=$(timeout 60s yes | speedtest --accept-license --accept-gdpr 2>&1)
+    exit_code=$?
+
+    if [[ $exit_code -ne 0 ]]; then
+        ShellBot.sendMessage --chat_id $id_admin \
+            --text "❌ <b>O teste de velocidade falhou após a instalação.</b> (Código de saída: $exit_code)\n\n<b>Saída para depuração:</b>\n<pre>$RESULT</pre>" \
+            --parse_mode html
+        return 0
+    fi
 
 
     local PING=$(echo "$RESULT" | grep "Latency:" | awk '{print $2, $3}')
@@ -870,14 +944,12 @@ speed_test() {
     local UPLOAD=$(echo "$RESULT" | grep "Upload:" | awk '{print $2, $3}')
     local SHARE_URL=$(echo "$RESULT" | grep "Result URL:" | awk '{print $3}')
 
-
     if [[ -z "$PING" || -z "$DOWNLOAD" ]]; then
         ShellBot.sendMessage --chat_id $id_admin \
-            --text "❌ <b>Falha ao extrair os resultados do teste.</b>\n\nIsso pode acontecer se o speedtest precisar ser atualizado. Tente usar a opção de reinstalação no seu script de menu.\n\n<b>Saída bruta para depuração:</b>\n<pre>$RESULT</pre>" \
+            --text "❌ <b>Falha ao extrair os resultados.</b>\n\n<b>Saída bruta:</b>\n<pre>$RESULT</pre>" \
             --parse_mode html
         return 0
     fi
-
 
     local msg
     msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
@@ -890,7 +962,6 @@ speed_test() {
     ShellBot.sendMessage --chat_id $id_admin \
         --text "$(echo -e "$msg")" \
         --parse_mode html
-
 
     if [[ -n "$SHARE_URL" ]]; then
         ShellBot.sendMessage --chat_id $id_admin \
@@ -1292,7 +1363,7 @@ restaure_backup() {
 }
 msg_bem_vindo() {
     local msg
-    msg="✌️😃 Ola <b>${message_from_first_name[$id]}</b>\n\nBEM VINDO(a)\n\n"
+    msg="✌️😃 Ola <b>${message_from_first_name[$id]}</b>\n\nBEM VINDO(a) AO BOT SSHPLUS\n\n"
     msg+="Para acessar o menu\nclick ou execute [ /menu ]\n\n"
     msg+="Para obter informacoes\nclick ou execute [ /ajuda ]\n\n"
     ShellBot.sendMessage --chat_id ${message_chat_id[$id]} \
