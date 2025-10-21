@@ -837,33 +837,69 @@ otimizer() {
 }
 
 speed_test() {
+    # Verifica se o solicitante é o administrador
     [[ "${callback_query_from_id[$id]}" != "$id_admin" ]] && {
         ShellBot.sendMessage --chat_id ${callback_query_message_chat_id[$id]} \
             --text "$(echo -e 🚫 ACESSO NEGADO 🚫)"
         return 0
     }
-    rm -rf $HOME/speed >/dev/null 2>&1
+
+    # Verifica se o comando speedtest-cli está instalado no sistema
+    if ! command -v speedtest-cli &> /dev/null; then
+        ShellBot.answerCallbackQuery --callback_query_id ${callback_query_id[$id]} \
+            --text "ERRO: speedtest-cli não está instalado."
+            
+        ShellBot.sendMessage --chat_id $id_admin \
+            --text "⚠️ <b>A ferramenta de teste de velocidade não foi encontrada.</b>\n\nPara corrigir, instale-a com o comando:\n<code>apt update && apt install speedtest-cli -y</code>" \
+            --parse_mode html
+        return 0
+    fi
+
+    # Define um local seguro e limpo para o arquivo de resultado
+    local speed_log="/tmp/speedtest_result.log"
+    rm -f "$speed_log"
+
     ShellBot.answerCallbackQuery --callback_query_id ${callback_query_id[$id]} \
-        --text "🚀 TESTANDO VELOCIDADE DO SERVIDOR"
-    speedtest --share >speed
-    png=$(cat speed | sed -n '5 p' | awk -F : {'print $NF'})
-    down=$(cat speed | sed -n '7 p' | awk -F : {'print $NF'})
-    upl=$(cat speed | sed -n '9 p' | awk -F : {'print $NF'})
-    lnk=$(cat speed | sed -n '10 p' | awk {'print $NF'})
+        --text "🚀 TESTANDO VELOCIDADE DO SERVIDOR..."
+
+    # Executa o teste e salva a saída no arquivo de log
+    speedtest-cli --share > "$speed_log"
+
+    # Analisa o resultado de forma segura, buscando por palavras-chave
+    local png=$(grep "Ping" "$speed_log" | awk -F: '{print $2}' | xargs)
+    local down=$(grep "Download" "$speed_log" | awk -F: '{print $2}' | xargs)
+    local upl=$(grep "Upload" "$speed_log" | awk -F: '{print $2}' | xargs)
+    local lnk=$(grep "Share results" "$speed_log" | awk '{print $NF}') # Pega a última palavra da linha, que é o link
+
+    # Verifica se os resultados foram obtidos com sucesso
+    if [[ -z "$down" || -z "$upl" ]]; then
+        ShellBot.sendMessage --chat_id $id_admin \
+            --text "❌ Falha ao realizar o teste de velocidade. Tente novamente."
+        rm -f "$speed_log"
+        return 0
+    fi
+
     local msg
     msg="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n"
     msg+="<b>🚀 VELOCIDADE DO SERVIDOR 🚀</b>\n"
     msg+="=×=×=×=×=×=×=×=×=×=×=×=×=×=\n\n"
-    msg+="<b>PING/LATENCIA:</b>$png\n"
-    msg+="<b>DOWNLOAD:</b>$down\n"
-    msg+="<b>UPLOAD:</b>$upl\n"
+    msg+="<b>PING/LATENCIA:</b> $png\n"
+    msg+="<b>DOWNLOAD:</b> $down\n"
+    msg+="<b>UPLOAD:</b> $upl\n"
+    
     ShellBot.sendMessage --chat_id $id_admin \
-        --text "$(echo -e $msg)" \
+        --text "$(echo -e "$msg")" \
         --parse_mode html
-    ShellBot.sendMessage --chat_id $id_admin \
-        --text "$(echo -e $lnk)" \
-        --parse_mode html
-    rm -rf $HOME/speed >/dev/null 2>&1
+
+    # Envia o link com a imagem do resultado, se existir
+    if [[ -n "$lnk" ]]; then
+        ShellBot.sendMessage --chat_id $id_admin \
+            --text "$lnk" \
+            --parse_mode html
+    fi
+
+    # Limpa o arquivo temporário
+    rm -f "$speed_log"
     return 0
 }
 
